@@ -27,6 +27,7 @@ namespace NorthwindConsole
                     choice = Console.ReadLine();
                     Console.Clear();
                     logger.Info($"Option {choice} selected");
+                    Console.WriteLine("\n");
                     if (choice == "1")
                     {
                         var db = new NorthwindContext();
@@ -46,50 +47,23 @@ namespace NorthwindConsole
                         Console.WriteLine("Enter the Category Description:");
                         category.Description = Console.ReadLine();
 
-                        // save category to db
                         var db = new NorthwindContext();
                         //db.AddCategory(category);
-                        db.Categories.Add(category);
+                        //db.Categories.Add(category);
 
-                        foreach (var validationResult in db.GetValidationErrors())
-                        {
-                            foreach (var error in validationResult.ValidationErrors)
-                            {
-                                logger.Error(
-                                    "Entity Property: {0}, Error {1}",
-                                    error.PropertyName,
-                                    error.ErrorMessage);
-                            }
-                        }
-
-
-                        //ValidationContext context = new ValidationContext(category, null, null);
-                        //List<ValidationResult> results = new List<ValidationResult>();
-
-                        //var isValid = Validator.TryValidateObject(category, context, results, true);
-                        //if (isValid)
+                        //foreach (var validationResult in db.GetValidationErrors())
                         //{
-                        //    var db = new NorthwindContext();
-                        //    // check for unique name
-                        //    if (db.Categories.Any(c => c.CategoryName == category.CategoryName))
+                        //    foreach (var error in validationResult.ValidationErrors)
                         //    {
-                        //        // generate validation error
-                        //        isValid = false;
-                        //        results.Add(new ValidationResult("Name exists", new string[] { "CategoryName" }));
-                        //    }
-                        //    else
-                        //    {
-                        //        logger.Info("Validation passed");
-                        //        // TODO: save category to db
+                        //        logger.Error(
+                        //            "Entity Property: {0}, Error {1}",
+                        //            error.PropertyName,
+                        //            error.ErrorMessage);
                         //    }
                         //}
-                        //if (!isValid)
-                        //{
-                        //    foreach (var result in results)
-                        //    {
-                        //        logger.Error($"{result.MemberNames.First()} : {result.ErrorMessage}");
-                        //    }
-                        //}
+
+                        db.AddCategory(category);
+
                     }
                     else if (choice == "3")
                     {
@@ -102,15 +76,38 @@ namespace NorthwindConsole
                             Console.WriteLine($"{item.CategoryId}) {item.CategoryName}");
                         }
 
-                        int id = int.Parse(Console.ReadLine());
-                        Console.Clear();
-                        logger.Info($"CategoryId {id} selected");
-                        Category category = db.Categories.FirstOrDefault(c => c.CategoryId == id);
-                        Console.WriteLine($"{category.CategoryName} - {category.Description}");
-                        foreach (Product p in category.Products)
+                        //Make sure choice is a number
+                        if (int.TryParse(Console.ReadLine(), out int id))
                         {
-                            Console.WriteLine(p.ProductName);
+                            //Make sure ID is in database
+                            if (query.Any(c => c.CategoryId == id))
+                            {
+                                Console.Clear();
+                                logger.Info($"CategoryId {id} selected");
+                                Category category = db.Categories.FirstOrDefault(c => c.CategoryId == id);
+                                Console.WriteLine($"{category.CategoryName} - {category.Description}");
+                                foreach (Product p in category.Products)
+                                {
+                                    Console.WriteLine(p.ProductName);
+                                }
+                            }
+                            else
+                            {
+                                logger.Error("Selection does not exist in the database.");
+                                Console.WriteLine("Please try again. Please ENTER to continue.");
+                                Console.ReadLine();
+                                Console.Clear();
+                            }
                         }
+                        else
+                        {
+
+                            logger.Error("Selection was not a number or was a decimal number.");
+                            Console.WriteLine("Please try again. Please ENTER to continue.");
+                            Console.ReadLine();
+                            Console.Clear();
+                        }
+
                     }
                     else if (choice == "4")
                     {
